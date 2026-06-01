@@ -1,0 +1,10 @@
+# ============================================================================
+# Terraform Variables — Example
+# ============================================================================
+# Copy to terraform.tfvars and fill in your values.
+# Do NOT commit terraform.tfvars to Git!
+# ============================================================================
+
+region             = "us-east-1"
+assets_bucket_name = "bedrock assets ALT/SOE/025/3621"
+student_id         = "ALT/SOE/025/3621"

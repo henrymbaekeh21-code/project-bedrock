@@ -1,0 +1,21 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!terraform.tfvars.example
+.terraform.lock.hcl
+*.zip
+
+# Lambda
+lambda/*.zip
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Grading
+grading.json

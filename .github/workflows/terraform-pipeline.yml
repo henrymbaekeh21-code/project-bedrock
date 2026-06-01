@@ -1,0 +1,109 @@
+# ============================================================================
+# Project Bedrock — Terraform CI/CD Pipeline
+# ============================================================================
+
+name: Terraform Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform-pipeline.yml"
+  pull_request:
+    branches: [main]
+    paths: ["terraform/**"]
+  workflow_dispatch:
+
+env:
+  TF_IN_AUTOMATION: true
+  AWS_REGION: us-east-1
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - run: terraform init
+
+      - run: terraform fmt -check -recursive
+
+      - run: terraform validate
+
+      - run: terraform plan -no-color -out=tfplan
+        env:
+          TF_VAR_assets_bucket_name: ${{ secrets.ASSETS_BUCKET_NAME }}
+          TF_VAR_student_id: ${{ secrets.STUDENT_ID }}
+
+      - run: terraform show -no-color tfplan > plan.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: terraform/plan.txt
+
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('terraform/plan.txt', 'utf8');
+            const truncated = plan.length > 65000 ? plan.substring(0, 65000) + '\n\n... (truncated)' : plan;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `#### Terraform Plan Output\n\`\`\`\n${truncated}\n\`\`\``
+            });
+
+  apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - run: terraform init
+
+      - run: terraform apply -auto-approve
+        env:
+          TF_VAR_assets_bucket_name: ${{ secrets.ASSETS_BUCKET_NAME }}
+          TF_VAR_student_id: ${{ secrets.STUDENT_ID }}
+
+      - run: terraform output -json > ../grading.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: grading-output
+          path: grading.json
