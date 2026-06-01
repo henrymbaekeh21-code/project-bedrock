@@ -24,7 +24,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "project-bedrock-terraform-state"
+    bucket = "project-bedrock-state-alt-soe-025-3621"
     key    = "infrastructure/terraform.tfstate"
     region = "us-east-1"
   }
