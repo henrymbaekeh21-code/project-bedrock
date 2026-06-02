@@ -4,4 +4,7 @@ variable "vpc_id" { type = string }
 variable "private_subnets" { type = list(string) }
 variable "public_subnets" { type = list(string) }
 variable "node_groups" { type = map(any) }
-variable "tags" { type = map(string) default = {} }
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
