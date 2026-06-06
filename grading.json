@@ -1,0 +1,76 @@
+{
+  "student_id": "ALT/SOE/025/3621",
+  "student_name": "Henry Mba-Ekeh",
+  "project_name": "Project Bedrock - InnovateMart",
+  "track": "Cloud Engineering",
+  "submission_date": "2026-06-03",
+  "capstone_tag": "Project: karatu-2025-capstone",
+  "infrastructure": {
+    "vpc": {
+      "name": "project-bedrock-vpc",
+      "status": "Deployed",
+      "cidr": "10.0.0.0/16",
+      "subnets": "3 public, 3 private across 3 AZs"
+    },
+    "eks_cluster": {
+      "name": "project-bedrock-cluster",
+      "version": "1.34",
+      "status": "ACTIVE",
+      "node_group": "general (t3.micro, 3 nodes)"
+    },
+    "rds": {
+      "mysql": {
+        "status": "Running",
+        "location": "Private subnets"
+      },
+      "postgresql": {
+        "status": "Running",
+        "location": "Private subnets"
+      }
+    },
+    "dynamodb": {
+      "table_name": "retail-store-products",
+      "status": "Active"
+    },
+    "s3": {
+      "bucket_name": "bedrock-assets-alt-soe-025-3621",
+      "status": "Available"
+    },
+    "lambda": {
+      "function_name": "bedrock-asset-processor",
+      "status": "Active"
+    },
+    "alb": {
+      "status": "Active",
+      "ingress_class": "alb",
+      "dns": "k8s-retailap-ui-6039ab69e6-616947023.us-east-1.elb.amazonaws.com"
+    }
+  },
+  "iam": {
+    "user": "bedrock-dev-view",
+    "policies": [
+      "ReadOnlyAccess",
+      "Custom EKS View Policy"
+    ]
+  },
+  "application": {
+    "namespace": "retail-app",
+    "deployment": "ui",
+    "image": "nginx:alpine",
+    "custom_page": "index.html (colorful glass-morphism design)",
+    "endpoint": "http://k8s-retailap-ui-6039ab69e6-616947023.us-east-1.elb.amazonaws.com"
+  },
+  "cicd": {
+    "pipeline": "GitHub Actions",
+    "triggers": [
+      "Terraform Plan on Pull Request",
+      "Terraform Apply on Merge to main"
+    ],
+    "state_backend": "S3 (project-bedrock-state-alt-soe-025-3621)"
+  },
+  "urls": {
+    "github_repo": "https://github.com/henrymbaek/project-bedrock",
+    "application_endpoint": "http://k8s-retailap-ui-6039ab69e6-616947023.us-east-1.elb.amazonaws.com",
+    "google_doc": "[To be filled by student]"
+  }
+}
